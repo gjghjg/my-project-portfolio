@@ -94,3 +94,20 @@ test("粒子背景：尊重减少动态效果的系统设置", () => {
   const flow = readFileSync(join(root, "js", "flow-background.js"), "utf8");
   assert.ok(flow.includes("prefers-reduced-motion"), "未处理 prefers-reduced-motion");
 });
+
+// ---------- 项目文档（防止"记忆文件"被误删） ----------
+
+test("文档：README.md 存在且包含运行命令", () => {
+  const readmePath = join(root, "README.md");
+  assert.ok(existsSync(readmePath), "缺少 README.md");
+  const readme = readFileSync(readmePath, "utf8");
+  assert.ok(readme.includes("npm run dev"), "README 缺少运行命令说明");
+  assert.ok(readme.includes("npm test"), "README 缺少测试命令说明");
+});
+
+test("文档：DECISIONS.md 存在且包含决策记录", () => {
+  const decisionsPath = join(root, "DECISIONS.md");
+  assert.ok(existsSync(decisionsPath), "缺少 DECISIONS.md");
+  const decisions = readFileSync(decisionsPath, "utf8");
+  assert.ok(/## \d{4}-\d{2}-\d{2}/.test(decisions), "DECISIONS 缺少带日期的决策条目");
+});
