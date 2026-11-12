@@ -8,11 +8,16 @@
  * 3. 粒子移动时画出细小的线段，并用半透明背景色覆盖上一帧，形成拖尾；
  * 4. 粒子跑出屏幕就随机重生，动画就永远流动下去。
  *
+ * 性能优化（2026-11-12）：
+ * - 页面切到后台时自动暂停动画，回到前台再恢复（省 CPU / 省电）；
+ * - 小屏设备自动减少粒子数量（手机 <300、平板 <600、桌面 900）；
+ * - 在网址后加 ?debug（如 http://localhost:7100/?debug）可显示实时帧率。
+ *
  * 想改效果？试试调整下面的 CONFIG 里的参数。
  */
 
 const CONFIG = {
-  particleCount: 900, // 粒子数量：越多越密集，也越耗性能
+  particleCount: 900, // 桌面端粒子数量：越多越密集，也越耗性能
   speed: 0.6, // 粒子移动速度
   scale: 0.0022, // 流场的「缩放」：越小，流向变化越平缓、流线越长
   lineWidth: 0.8, // 粒子轨迹粗细
@@ -20,14 +25,43 @@ const CONFIG = {
   timeSpeed: 0.00035, // 流场随时间变化的速度
 };
 
+/** 根据屏幕宽度决定粒子数量：小屏设备性能弱，少画一些。 */
+export function responsiveParticleCount(width) {
+  if (width < 600) return 300;
+  if (width < 1024) return 600;
+  return CONFIG.particleCount;
+}
+
 export function startFlowBackground(canvas) {
   const ctx = canvas.getContext("2d");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const debug = new URLSearchParams(window.location.search).has("debug");
   let particles = [];
   let width = 0;
   let height = 0;
   let animationId = null;
   let time = 0;
+
+  // ---------- 帧率显示（仅 ?debug 模式） ----------
+  let fpsEl = null;
+  let frames = 0;
+  let fpsTimer = null;
+  if (debug) {
+    fpsEl = document.createElement("div");
+    fpsEl.id = "fps-meter";
+    fpsEl.style.cssText =
+      "position:fixed;right:24px;top:24px;z-index:9;font:12px monospace;" +
+      "padding:4px 8px;border:1px solid currentColor;opacity:0.7";
+    document.body.appendChild(fpsEl);
+  }
+
+  function updateFps() {
+    if (!fpsEl) return;
+    // animationId 为 null 表示动画暂停中
+    const fps = animationId === null ? 0 : frames;
+    fpsEl.textContent = `${fps} FPS · ${particles.length} 粒子`;
+    frames = 0;
+  }
 
   /** 读取当前主题的背景色和粒子颜色（跟随 LIGHT / DARK 切换）。 */
   function themeColors() {
@@ -50,10 +84,13 @@ export function startFlowBackground(canvas) {
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // 重置画布和粒子
+    // 重置画布和粒子（数量随屏幕宽度自适应）
     ctx.fillStyle = themeColors().bg;
     ctx.fillRect(0, 0, width, height);
-    particles = Array.from({ length: CONFIG.particleCount }, randomParticle);
+    particles = Array.from(
+      { length: responsiveParticleCount(width) },
+      randomParticle
+    );
   }
 
   /** 流场函数：返回 (x, y) 处粒子的运动方向（弧度）。 */
@@ -97,13 +134,17 @@ export function startFlowBackground(canvas) {
       }
     }
 
+    frames++;
     animationId = requestAnimationFrame(tick);
   }
 
   function start() {
-    if (animationId === null && !reducedMotion.matches) {
-      resize();
+    if (animationId === null && !reducedMotion.matches && !document.hidden) {
       animationId = requestAnimationFrame(tick);
+    }
+    if (debug && fpsTimer === null) {
+      fpsTimer = setInterval(updateFps, 1000);
+      updateFps();
     }
   }
 
@@ -114,11 +155,18 @@ export function startFlowBackground(canvas) {
     }
   }
 
+  // 页面切到后台时暂停、回到前台恢复
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
   window.addEventListener("resize", resize);
   reducedMotion.addEventListener("change", () => {
     if (reducedMotion.matches) stop();
     else start();
   });
 
+  resize(); // 初始化一次；之后 start() 只负责启动动画，不再重置粒子
   start();
 }

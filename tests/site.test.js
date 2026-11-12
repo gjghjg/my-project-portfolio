@@ -95,6 +95,22 @@ test("粒子背景：尊重减少动态效果的系统设置", () => {
   assert.ok(flow.includes("prefers-reduced-motion"), "未处理 prefers-reduced-motion");
 });
 
+// ---------- 性能优化 ----------
+
+test("性能：粒子数量随屏幕宽度降级", async () => {
+  const { responsiveParticleCount } = await import("../js/flow-background.js");
+  assert.equal(responsiveParticleCount(375), 300, "手机应为 300 粒子");
+  assert.equal(responsiveParticleCount(800), 600, "平板应为 600 粒子");
+  assert.equal(responsiveParticleCount(1440), 900, "桌面应为 900 粒子");
+});
+
+test("性能：页面切到后台时暂停动画", () => {
+  const flow = readFileSync(join(root, "js", "flow-background.js"), "utf8");
+  assert.ok(flow.includes("visibilitychange"), "未监听 visibilitychange");
+  assert.ok(flow.includes("document.hidden"), "未检查 document.hidden");
+  assert.ok(flow.includes("cancelAnimationFrame"), "暂停时未取消动画帧");
+});
+
 // ---------- 项目文档（防止"记忆文件"被误删） ----------
 
 test("文档：README.md 存在且包含运行命令", () => {
