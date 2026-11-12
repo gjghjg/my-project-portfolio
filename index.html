@@ -1,74 +1,88 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>你的名字 · 个人作品集</title>
+  <title>你的名字 · Developer</title>
   <meta name="description" content="个人项目作品集网站" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- 顶部导航 -->
-  <header class="site-header">
-    <nav class="nav container">
-      <a class="nav__logo" href="#top">你的名字</a>
-      <ul class="nav__links">
-        <li><a href="#about">关于我</a></li>
-        <li><a href="#projects">项目</a></li>
-        <li><a href="#contact">联系</a></li>
+  <!-- 粒子流动背景（Canvas 绘制，见 js/flow-background.js） -->
+  <canvas id="flow-canvas" aria-hidden="true"></canvas>
+
+  <!-- 细边框框架，装饰用 -->
+  <div class="frame" aria-hidden="true"></div>
+
+  <!-- 左下角竖排主题切换 -->
+  <div class="theme-switch">
+    <button id="theme-light" class="theme-switch__btn" type="button" aria-pressed="true">■ LIGHT</button>
+    <button id="theme-dark" class="theme-switch__btn" type="button" aria-pressed="false">□ DARK</button>
+  </div>
+
+  <!-- 首屏 -->
+  <header class="hero">
+    <div class="hero__heading">
+      <h1 class="hero__name">你的名字</h1>
+      <p class="hero__role">Developer in Training</p>
+    </div>
+
+    <nav class="nav" aria-label="页面导航">
+      <ul class="nav__list">
+        <li><a class="nav__link" href="#top">● Home</a></li>
+        <li><a class="nav__link" href="#projects">● Projects</a></li>
+        <li><a class="nav__link" href="#info">● Info</a></li>
+        <li><a class="nav__link" href="#contact">● Contact</a></li>
       </ul>
     </nav>
+
+    <p class="hero__intro">
+      正在学习前端开发。<br />
+      相信简洁的设计<br />
+      也能充满力量。<br />
+      通过一个个小项目，<br />
+      把学到的知识<br />
+      变成看得见的作品。
+    </p>
   </header>
 
   <main id="top">
-    <!-- 首屏简介 -->
-    <section class="hero container">
-      <p class="hero__greeting">你好，我是</p>
-      <h1 class="hero__name">你的名字</h1>
-      <p class="hero__tagline">一名正在学习中的开发者，喜欢动手做项目。</p>
-      <div class="hero__actions">
-        <a class="btn btn--primary" href="#projects">查看我的项目</a>
-        <a class="btn btn--ghost" href="#contact">联系我</a>
-      </div>
-    </section>
-
-    <!-- 关于我 -->
-    <section id="about" class="section container">
-      <h2 class="section__title">关于我</h2>
-      <p class="section__text">
-        这里写一段自我介绍：你的专业背景、正在学习的技术、感兴趣的方向等。
-        示例：我是一名计算机相关专业的学生 / 自学编程的爱好者，目前在学习
-        HTML、CSS、JavaScript，喜欢把学到的知识做成小项目。
-      </p>
-      <ul class="skills">
-        <li class="skill">HTML</li>
-        <li class="skill">CSS</li>
-        <li class="skill">JavaScript</li>
-        <li class="skill">Git</li>
+    <!-- 项目列表（由 JS 根据 data.js 中的数据渲染） -->
+    <section id="projects" class="section">
+      <h2 class="section__label">PROJECTS</h2>
+      <ul id="project-list" class="project-list">
+        <!-- 项目条目由 js/main.js 动态生成 -->
       </ul>
     </section>
 
-    <!-- 项目列表（由 JS 根据 data.js 中的数据渲染） -->
-    <section id="projects" class="section container">
-      <h2 class="section__title">项目作品</h2>
-      <div id="project-list" class="project-grid">
-        <!-- 项目卡片由 js/main.js 动态生成 -->
-      </div>
+    <!-- 关于我 -->
+    <section id="info" class="section">
+      <h2 class="section__label">INFO</h2>
+      <p class="section__text">
+        这里写一段自我介绍：你的专业背景、正在学习的技术、感兴趣的方向。
+        示例：我是一名编程自学者，目前在学习 HTML、CSS、JavaScript，
+        喜欢把学到的知识做成小项目。
+      </p>
+      <ul class="skills">
+        <li>HTML</li>
+        <li>CSS</li>
+        <li>JavaScript</li>
+        <li>Git</li>
+      </ul>
     </section>
 
     <!-- 联系方式 -->
-    <section id="contact" class="section container">
-      <h2 class="section__title">联系我</h2>
-      <p class="section__text">如果你想和我交流或合作，欢迎通过以下方式联系：</p>
+    <section id="contact" class="section">
+      <h2 class="section__label">CONTACT</h2>
       <ul class="contact-list">
-        <li>邮箱：<a href="mailto:you@example.com">you@example.com</a></li>
-        <li>GitHub：<a href="https://github.com/yourname" target="_blank" rel="noopener">github.com/yourname</a></li>
+        <li><a href="mailto:you@example.com">you@example.com</a></li>
+        <li><a href="https://github.com/yourname" target="_blank" rel="noopener">github.com/yourname</a></li>
       </ul>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p class="container">© <span id="year"></span> 你的名字 · 用 ❤ 和代码构建</p>
+    <p>© <span id="year"></span> 你的名字</p>
   </footer>
 
   <script type="module" src="js/main.js"></script>

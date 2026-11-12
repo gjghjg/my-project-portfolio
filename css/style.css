@@ -1,17 +1,24 @@
-/* ===========================
-   全局变量与基础样式
-   =========================== */
+/* ==========================================================
+   风格参考：Keita Yamada (p5aholic.me)
+   关键词：细边框、竖排导航、粗体文字、明暗主题、粒子背景
+   ========================================================== */
+
+/* ---------- 主题变量：LIGHT ---------- */
 :root {
-  --color-bg: #ffffff;
-  --color-surface: #f6f7f9;
-  --color-text: #1f2329;
-  --color-text-muted: #5f6b7a;
-  --color-primary: #3b6ef6;
-  --color-primary-dark: #2b55c9;
-  --color-border: #e3e6ea;
-  --radius: 10px;
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  --max-width: 960px;
+  --color-bg: #e8e8e8;
+  --color-text: #1a1a1a;
+  --color-muted: #555555;
+  --color-line: #1a1a1a;
+  --particle-color: 26, 26, 26; /* 粒子颜色（RGB，供 Canvas 使用） */
+}
+
+/* ---------- 主题变量：DARK ---------- */
+[data-theme="dark"] {
+  --color-bg: #141414;
+  --color-text: #e8e8e8;
+  --color-muted: #a0a0a0;
+  --color-line: #e8e8e8;
+  --particle-color: 232, 232, 232;
 }
 
 * {
@@ -25,272 +32,243 @@ html {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-    "Microsoft YaHei", sans-serif;
-  color: var(--color-text);
+  font-family: "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
   background: var(--color-bg);
-  line-height: 1.7;
+  color: var(--color-text);
+  line-height: 1.6;
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 a {
-  color: var(--color-primary);
+  color: inherit;
   text-decoration: none;
 }
 
 a:hover {
-  text-decoration: underline;
+  opacity: 0.55;
 }
 
-.container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 24px;
+/* ---------- 背景画布：固定在内容后面 ---------- */
+#flow-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
 }
 
-/* ===========================
-   顶部导航
-   =========================== */
-.site-header {
-  position: sticky;
-  top: 0;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--color-border);
-  z-index: 10;
+/* ---------- 细边框框架 ---------- */
+.frame {
+  position: fixed;
+  inset: 16px;
+  border: 1px solid var(--color-line);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 60px;
+/* 所有真实内容都在画布和框架之上 */
+.hero,
+main,
+.site-footer,
+.theme-switch {
+  position: relative;
+  z-index: 2;
 }
 
-.nav__logo {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--color-text);
-}
-
-.nav__links {
-  display: flex;
-  gap: 24px;
-  list-style: none;
-}
-
-.nav__links a {
-  color: var(--color-text-muted);
-}
-
-.nav__links a:hover {
-  color: var(--color-primary);
-  text-decoration: none;
-}
-
-/* ===========================
-   首屏
-   =========================== */
+/* ---------- 首屏布局 ---------- */
 .hero {
-  padding: 96px 24px 80px;
-}
-
-.hero__greeting {
-  color: var(--color-primary);
-  font-weight: 600;
-  margin-bottom: 8px;
+  min-height: 100vh;
+  padding: 56px 56px 56px;
+  display: flex;
+  flex-direction: column;
 }
 
 .hero__name {
-  font-size: 2.8rem;
-  line-height: 1.2;
-  margin-bottom: 12px;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 300; /* 细体大名字 */
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
-.hero__tagline {
-  font-size: 1.15rem;
-  color: var(--color-text-muted);
-  margin-bottom: 32px;
-  max-width: 560px;
-}
-
-.hero__actions {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-/* ===========================
-   按钮
-   =========================== */
-.btn {
-  display: inline-block;
-  padding: 10px 22px;
-  border-radius: var(--radius);
+.hero__role {
+  font-size: 1rem;
   font-weight: 600;
-  transition: background 0.2s ease, color 0.2s ease;
+  margin-top: 4px;
 }
 
-.btn:hover {
-  text-decoration: none;
+/* ---------- 竖排导航（首屏左侧） ---------- */
+.nav {
+  margin-top: 56px;
 }
 
-.btn--primary {
-  background: var(--color-primary);
-  color: #fff;
+.nav__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.btn--primary:hover {
-  background: var(--color-primary-dark);
+.nav__link {
+  font-weight: 700;
+  font-size: 1.05rem;
 }
 
-.btn--ghost {
-  border: 1px solid var(--color-border);
+/* ---------- 首屏右下简介 ---------- */
+.hero__intro {
+  margin-top: auto; /* 把简介推到底部 */
+  margin-left: auto; /* 并靠右 */
+  max-width: 300px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+/* ---------- 左下竖排主题切换 ---------- */
+.theme-switch {
+  position: fixed;
+  left: 22px;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 3;
+}
+
+.theme-switch__btn {
+  writing-mode: vertical-rl; /* 竖排文字 */
+  transform: rotate(180deg); /* 从下往上读 */
+  background: none;
+  border: none;
   color: var(--color-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
 }
 
-.btn--ghost:hover {
-  background: var(--color-surface);
+.theme-switch__btn:hover {
+  opacity: 0.55;
 }
 
-/* ===========================
-   通用区块
-   =========================== */
+/* ---------- 通用区块 ---------- */
 .section {
-  padding: 64px 24px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 80px 32px;
 }
 
-.section__title {
-  font-size: 1.6rem;
-  margin-bottom: 20px;
-  position: relative;
-}
-
-.section__title::after {
-  content: "";
-  display: block;
-  width: 48px;
-  height: 3px;
-  background: var(--color-primary);
-  border-radius: 2px;
-  margin-top: 8px;
+.section__label {
+  font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--color-muted);
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: 10px;
 }
 
 .section__text {
-  color: var(--color-text-muted);
-  max-width: 640px;
+  color: var(--color-muted);
 }
 
-/* ===========================
-   技能标签
-   =========================== */
-.skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+/* ---------- 项目列表：极简文字行 ---------- */
+.project-list {
   list-style: none;
-  margin-top: 20px;
 }
 
-.skill {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  padding: 4px 14px;
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+.project-item {
+  border-bottom: 1px solid var(--color-line);
+  padding: 22px 0;
 }
 
-/* ===========================
-   项目卡片
-   =========================== */
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+.project-item:first-child {
+  border-top: 1px solid var(--color-line);
 }
 
-.project-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 22px;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.project-item__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: inline-block;
 }
 
-.project-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
+.project-item__desc {
+  color: var(--color-muted);
+  margin-top: 6px;
+  max-width: 520px;
 }
 
-.project-card__title {
-  font-size: 1.15rem;
-  margin-bottom: 8px;
-}
-
-.project-card__desc {
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
-  flex-grow: 1;
-  margin-bottom: 14px;
-}
-
-.project-card__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
-  margin-bottom: 14px;
-}
-
-.project-card__tag {
+.project-item__tags {
+  font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
   font-size: 0.8rem;
-  color: var(--color-primary);
-  background: rgba(59, 110, 246, 0.08);
-  border-radius: 6px;
-  padding: 2px 8px;
+  color: var(--color-muted);
+  margin-top: 10px;
+  letter-spacing: 0.05em;
 }
 
-.project-card__link {
-  font-weight: 600;
-  font-size: 0.95rem;
+.project-item__link {
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--color-line);
 }
 
-/* ===========================
-   联系方式 & 页脚
-   =========================== */
+/* ---------- 技能 & 联系 ---------- */
+.skills {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-top: 24px;
+  font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
+  font-size: 0.9rem;
+}
+
 .contact-list {
   list-style: none;
-  margin-top: 8px;
-  color: var(--color-text-muted);
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.contact-list li {
-  margin-bottom: 6px;
-}
-
+/* ---------- 页脚 ---------- */
 .site-footer {
-  border-top: 1px solid var(--color-border);
-  padding: 24px 0;
   text-align: center;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
+  padding: 32px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
 }
 
-/* ===========================
-   响应式（窄屏适配）
-   =========================== */
+/* ---------- 响应式 ---------- */
 @media (max-width: 600px) {
   .hero {
-    padding: 64px 24px 48px;
+    padding: 40px 32px 96px;
   }
 
-  .hero__name {
-    font-size: 2rem;
+  .hero__intro {
+    margin-left: 0;
+    max-width: 100%;
   }
 
-  .nav__links {
-    gap: 16px;
+  .theme-switch {
+    left: 12px;
+    bottom: 20px;
+  }
+
+  .frame {
+    inset: 8px;
+  }
+}
+
+/* 尊重系统「减少动态效果」设置 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

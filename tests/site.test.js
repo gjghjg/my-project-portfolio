@@ -7,6 +7,8 @@ import { projects } from "../js/data.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const html = readFileSync(join(root, "index.html"), "utf8");
+const css = readFileSync(join(root, "css", "style.css"), "utf8");
+const mainJs = readFileSync(join(root, "js", "main.js"), "utf8");
 
 // ---------- 项目数据校验 ----------
 
@@ -37,8 +39,8 @@ test("项目数据：项目标题不重复", () => {
 
 // ---------- 页面结构校验 ----------
 
-test("页面：包含核心区块（关于我 / 项目 / 联系）", () => {
-  for (const id of ["about", "projects", "contact"]) {
+test("页面：包含核心区块（Projects / Info / Contact）", () => {
+  for (const id of ["projects", "info", "contact"]) {
     assert.ok(html.includes(`id="${id}"`), `index.html 缺少 #${id} 区块`);
   }
 });
@@ -61,4 +63,34 @@ test("页面：有 lang、title 和 viewport 设置", () => {
   assert.ok(html.includes('lang="zh-CN"'), "缺少 lang 属性");
   assert.ok(/<title>.+<\/title>/.test(html), "缺少 <title>");
   assert.ok(html.includes("viewport"), "缺少 viewport meta");
+});
+
+// ---------- 新功能：主题切换 ----------
+
+test("主题切换：包含 LIGHT / DARK 按钮和 data-theme 属性", () => {
+  assert.ok(html.includes('id="theme-light"'), "缺少 LIGHT 切换按钮");
+  assert.ok(html.includes('id="theme-dark"'), "缺少 DARK 切换按钮");
+  assert.ok(html.includes('data-theme="light"'), "缺少默认 data-theme 属性");
+});
+
+test("主题切换：CSS 定义了 dark 主题变量", () => {
+  assert.ok(css.includes('[data-theme="dark"]'), "CSS 缺少 dark 主题变量");
+  assert.ok(css.includes("--color-bg"), "CSS 缺少 --color-bg 变量");
+});
+
+test("主题切换：JS 持久化用户选择（localStorage）", () => {
+  assert.ok(mainJs.includes("localStorage"), "main.js 未使用 localStorage 保存主题");
+});
+
+// ---------- 新功能：粒子流动背景 ----------
+
+test("粒子背景：包含 canvas 元素且模块文件存在", () => {
+  assert.ok(html.includes('id="flow-canvas"'), "缺少 #flow-canvas 画布");
+  assert.ok(existsSync(join(root, "js", "flow-background.js")), "缺少 flow-background.js");
+  assert.ok(mainJs.includes("startFlowBackground"), "main.js 未启动粒子背景");
+});
+
+test("粒子背景：尊重减少动态效果的系统设置", () => {
+  const flow = readFileSync(join(root, "js", "flow-background.js"), "utf8");
+  assert.ok(flow.includes("prefers-reduced-motion"), "未处理 prefers-reduced-motion");
 });
