@@ -111,6 +111,30 @@ test("性能：页面切到后台时暂停动画", () => {
   assert.ok(flow.includes("cancelAnimationFrame"), "暂停时未取消动画帧");
 });
 
+// ---------- 滚动效果 ----------
+
+test("滚动效果：模块存在且被 main.js 调用", () => {
+  assert.ok(existsSync(join(root, "js", "scroll-effects.js")), "缺少 scroll-effects.js");
+  assert.ok(mainJs.includes("setupReveal"), "main.js 未启用滚动淡入");
+  assert.ok(mainJs.includes("setupScrollspy"), "main.js 未启用导航高亮");
+});
+
+test("滚动效果：使用 IntersectionObserver 并处理减少动态效果", () => {
+  const fx = readFileSync(join(root, "js", "scroll-effects.js"), "utf8");
+  assert.ok(fx.includes("IntersectionObserver"), "未使用 IntersectionObserver");
+  assert.ok(fx.includes("prefers-reduced-motion"), "未处理 prefers-reduced-motion");
+});
+
+test("滚动效果：导航链接都有对应的真实区块", () => {
+  for (const m of html.matchAll(/class="nav__link" href="#([^"]+)"/g)) {
+    assert.ok(html.includes(`id="${m[1]}"`), `导航指向的 #${m[1]} 区块不存在`);
+  }
+});
+
+test("窄屏修复：简介为主题按钮留出左边距", () => {
+  assert.ok(css.includes("margin-left: 36px"), "窄屏简介未让出主题按钮位置");
+});
+
 // ---------- 项目文档（防止"记忆文件"被误删） ----------
 
 test("文档：README.md 存在且包含运行命令", () => {

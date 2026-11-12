@@ -1,5 +1,6 @@
 import { projects } from "./data.js";
 import { startFlowBackground } from "./flow-background.js";
+import { setupReveal, setupScrollspy } from "./scroll-effects.js";
 
 /**
  * 创建一个项目条目（极简文字行风格）。
@@ -96,6 +97,8 @@ export function updateFooterYear() {
 renderProjects();
 setupThemeSwitch();
 updateFooterYear();
+setupReveal();
+setupScrollspy();
 
 // 启动粒子流动背景
 const canvas = document.querySelector("#flow-canvas");
