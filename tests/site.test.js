@@ -135,6 +135,27 @@ test("窄屏修复：简介为主题按钮留出左边距", () => {
   assert.ok(css.includes("margin-left: 36px"), "窄屏简介未让出主题按钮位置");
 });
 
+// ---------- 上线收尾：favicon 与分享卡片 ----------
+
+test("favicon：SVG 图标存在且被 HTML 引用", () => {
+  assert.ok(existsSync(join(root, "assets", "favicon.svg")), "缺少 assets/favicon.svg");
+  assert.ok(html.includes('rel="icon"'), "HTML 未引用 favicon");
+  assert.ok(html.includes("assets/favicon.svg"), "favicon 路径不匹配");
+});
+
+test("分享卡片：OG meta 完整且图片真实存在", () => {
+  for (const prop of ["og:title", "og:description", "og:url", "og:image"]) {
+    assert.ok(html.includes(`property="${prop}"`), `缺少 ${prop}`);
+  }
+  assert.ok(html.includes('name="twitter:card"'), "缺少 twitter:card");
+  assert.ok(existsSync(join(root, "assets", "og-image.png")), "缺少 assets/og-image.png");
+});
+
+test("分享卡片：og:image 使用绝对地址（相对地址在社交平台无法显示）", () => {
+  const m = html.match(/property="og:image" content="([^"]+)"/);
+  assert.ok(m && m[1].startsWith("https://"), "og:image 必须是 https 绝对地址");
+});
+
 // ---------- 项目文档（防止"记忆文件"被误删） ----------
 
 test("文档：README.md 存在且包含运行命令", () => {
