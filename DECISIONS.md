@@ -53,9 +53,9 @@
 
 ## 待办 / 待定（TODO）
 
-- [ ] 替换所有占位内容：姓名、邮箱、GitHub 链接、示例项目（上线前必须完成）
-- [ ] 把仓库推到远程私有库（GitHub / Gitee），防止本地数据丢失
+- [ ] 替换所有占位内容：姓名、邮箱、GitHub 链接、示例项目
+- [x] 把仓库推到远程（2026-11-17 完成：https://github.com/gjghjg/my-project-portfolio ，公开仓库，因为免费版 Pages 要求公开）
 - [ ] 用手机实际访问，检查窄屏下导航和竖排主题切换按钮的布局
 - [x] 低端手机性能：考虑小屏时减少粒子数量（2026-11-12 完成，手机 300 / 平板 600 / 桌面 900）
-- [ ] 部署上线（GitHub Pages / Vercel / Cloudflare Pages 均可免费托管）
+- [x] 部署上线（2026-11-17 完成，GitHub Pages：https://gjghjg.github.io/my-project-portfolio/ ，推送自动更新）
 - [ ] 部署后补 favicon 和分享卡片（OG meta）

@@ -29,11 +29,10 @@ DECISIONS.md            设计/技术决策记录（"为什么这么做"）
 
 ## 部署（GitHub Pages）
 
-网站托管在 GitHub Pages，推送代码后自动更新：
+- **线上地址**：https://gjghjg.github.io/my-project-portfolio/
+- **仓库地址**：https://github.com/gjghjg/my-project-portfolio
 
-1. 仓库 Settings → Pages → Source 选「Deploy from a branch」，Branch 选 `main` / `(root)`。
-2. 保存后访问 `https://<用户名>.github.io/<仓库名>/`。
-3. 之后每次 `git push`，线上网站约 1 分钟内自动更新，同时 Actions 自动跑测试。
+已开启 Pages（Source：Deploy from a branch，main / root）。之后每次 `git push`，线上网站约 1 分钟内自动更新，同时 GitHub Actions 自动跑测试（见仓库 Actions 页）。
 
 ## 迭代方式
 
