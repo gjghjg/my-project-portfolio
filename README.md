@@ -18,12 +18,22 @@ index.html              页面结构（区块骨架，项目列表由 JS 渲染�
 css/style.css           全部样式（含明暗主题 CSS 变量）
 js/data.js              项目数据（新增作品只需在这里加一条）
 js/main.js              渲染逻辑、主题切换、页脚年份
-js/flow-background.js   粒子流动背景（Canvas 流场动画）
+js/flow-background.js   粒子流动背景（Canvas 流场动画，含性能优化）
+js/scroll-effects.js    滚动淡入 + 导航高亮（IntersectionObserver）
 scripts/dev-server.js   本地预览服务器
-tests/site.test.js      数据校验 + 页面结构校验
+tests/site.test.js      数据校验 + 页面结构校验 + 功能校验
 AGENTS.md               给 AI 协作者的工作约定（提交、测试）
 DECISIONS.md            设计/技术决策记录（"为什么这么做"）
+.github/workflows/      GitHub Actions：推送代码自动运行测试
 ```
+
+## 部署（GitHub Pages）
+
+网站托管在 GitHub Pages，推送代码后自动更新：
+
+1. 仓库 Settings → Pages → Source 选「Deploy from a branch」，Branch 选 `main` / `(root)`。
+2. 保存后访问 `https://<用户名>.github.io/<仓库名>/`。
+3. 之后每次 `git push`，线上网站约 1 分钟内自动更新，同时 Actions 自动跑测试。
 
 ## 迭代方式
 
