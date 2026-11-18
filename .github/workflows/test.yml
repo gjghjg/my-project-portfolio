@@ -1,12 +1,18 @@
-# GitHub Actions 工作流：每次推送代码自动运行测试
-# 包含两层：单元测试（Node）+ 端到端测试（Playwright 真实浏览器）。
-# 如果测试失败，GitHub 会在提交记录上显示红色叉号，并给你发邮件提醒。
-name: 运行测试
+# GitHub Actions 工作流：测试通过后才部署上线
+# ------------------------------------------------
+# 流程：push / PR → 单元测试 + E2E 测试 → 全绿才部署 GitHub Pages。
+# 测试失败时部署任务会被跳过，线上网站保持上一个正常版本，不会被坏代码覆盖。
+name: 测试并部署
 
 on:
   push:
     branches: [main] # 推送到 main 分支时触发
-  pull_request: # 有人提 PR 时也触发
+  pull_request: # 有人提 PR 时只跑测试，不部署
+  workflow_dispatch: # 允许在 Actions 页面手动触发
+
+# 默认只给读权限，部署任务单独申请 Pages 写入权限（最小权限原则）
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -37,3 +43,33 @@ jobs:
 
       - name: 运行 E2E 测试
         run: npm run test:e2e
+
+  deploy:
+    # 关键：needs 保证测试全绿才执行部署；失败则自动跳过，网站不更新
+    needs: test
+    # 只有推送到 main 才部署；PR 和手动以外的场景不发布
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write # 允许部署到 GitHub Pages
+      id-token: write # Pages 部署要求的身份校验
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      # 上传整个仓库根目录作为网站内容（本任务全新检出，没有 node_modules）
+      - name: 上传网站文件
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

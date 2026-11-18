@@ -37,7 +37,7 @@ DECISIONS.md            设计/技术决策记录（"为什么这么做"）
 - **线上地址**：https://gjghjg.github.io/my-project-portfolio/
 - **仓库地址**：https://github.com/gjghjg/my-project-portfolio
 
-已开启 Pages（Source：Deploy from a branch，main / root）。之后每次 `git push`，线上网站约 1 分钟内自动更新，同时 GitHub Actions 自动跑测试（见仓库 Actions 页）。
+已开启 Pages，**部署由 GitHub Actions 完成**（`.github/workflows/test.yml`）：每次 `git push` 先自动跑单元测试 + E2E 测试，全部通过后才发布到 Pages，约 1~2 分钟上线；测试失败则跳过部署，线上保持上一个正常版本。PR 只跑测试不发布。仓库 Settings → Pages 的 Source 需设为 **GitHub Actions**（不是 Deploy from a branch）。
 
 ## 迭代方式
 
