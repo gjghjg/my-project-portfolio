@@ -13,6 +13,10 @@
  * - 小屏设备自动减少粒子数量（手机 <300、平板 <600、桌面 900）；
  * - 在网址后加 ?debug（如 http://localhost:7100/?debug）可显示实时帧率。
  *
+ * 性能优化（2026-11-18）：
+ * - resize 事件加防抖：拖动窗口时连续触发的 resize 合并为一次重建粒子；
+ * - 主题颜色缓存：不再每帧调用 getComputedStyle，只在主题切换时重新读取。
+ *
  * 想改效果？试试调整下面的 CONFIG 里的参数。
  */
 
@@ -30,6 +34,18 @@ export function responsiveParticleCount(width) {
   if (width < 600) return 300;
   if (width < 1024) return 600;
   return CONFIG.particleCount;
+}
+
+/** 防抖：连续触发时只执行最后一次，wait 毫秒内的重复调用会被合并。 */
+export function debounce(fn, wait = 150) {
+  let timer = null;
+  return (...args) => {
+    if (timer !== null) clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = null;
+      fn(...args);
+    }, wait);
+  };
 }
 
 export function startFlowBackground(canvas) {
@@ -72,6 +88,16 @@ export function startFlowBackground(canvas) {
     };
   }
 
+  // 主题颜色缓存：getComputedStyle 有开销，不每帧读，
+  // 只在初始化、主题切换（data-theme 属性变化）时更新。
+  let colors = themeColors();
+  new MutationObserver(() => {
+    colors = themeColors();
+  }).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+
   function randomParticle() {
     return { x: Math.random() * width, y: Math.random() * height };
   }
@@ -85,7 +111,7 @@ export function startFlowBackground(canvas) {
     canvas.height = height * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // 重置画布和粒子（数量随屏幕宽度自适应）
-    ctx.fillStyle = themeColors().bg;
+    ctx.fillStyle = colors.bg;
     ctx.fillRect(0, 0, width, height);
     particles = Array.from(
       { length: responsiveParticleCount(width) },
@@ -102,7 +128,7 @@ export function startFlowBackground(canvas) {
   }
 
   function tick() {
-    const { bg, particle } = themeColors();
+    const { bg, particle } = colors;
 
     // 半透明覆盖，形成拖尾
     ctx.fillStyle = bg;
@@ -161,7 +187,8 @@ export function startFlowBackground(canvas) {
     else start();
   });
 
-  window.addEventListener("resize", resize);
+  // 拖动窗口会连续触发 resize，防抖合并，避免反复重建全部粒子
+  window.addEventListener("resize", debounce(resize, 150));
   reducedMotion.addEventListener("change", () => {
     if (reducedMotion.matches) stop();
     else start();

@@ -111,6 +111,33 @@ test("性能：页面切到后台时暂停动画", () => {
   assert.ok(flow.includes("cancelAnimationFrame"), "暂停时未取消动画帧");
 });
 
+test("性能：debounce 合并连续调用，只执行最后一次", async () => {
+  const { debounce } = await import("../js/flow-background.js");
+  let calls = [];
+  const record = debounce((v) => calls.push(v), 30);
+
+  record(1);
+  record(2);
+  record(3);
+  assert.equal(calls.length, 0, "等待期内不应立即执行");
+
+  await new Promise((r) => setTimeout(r, 60));
+  assert.deepEqual(calls, [3], "只执行一次，且用最后一次的参数");
+
+  record(4);
+  await new Promise((r) => setTimeout(r, 60));
+  assert.deepEqual(calls, [3, 4], "间隔超过等待期后正常再次执行");
+});
+
+test("性能：resize 使用防抖，主题颜色有缓存", () => {
+  const flow = readFileSync(join(root, "js", "flow-background.js"), "utf8");
+  assert.ok(flow.includes('debounce(resize, 150)'), "resize 未使用防抖");
+  assert.ok(flow.includes("MutationObserver"), "未监听主题变化来更新颜色缓存");
+  // tick 每帧执行，不应再直接调用 getComputedStyle
+  const tickBody = flow.split("function tick()")[1]?.split("function start()")[0] ?? "";
+  assert.ok(!tickBody.includes("themeColors()"), "tick 内不应每帧读取计算样式");
+});
+
 // ---------- 滚动效果 ----------
 
 test("滚动效果：模块存在且被 main.js 调用", () => {
