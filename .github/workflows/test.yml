@@ -1,4 +1,5 @@
 # GitHub Actions 工作流：每次推送代码自动运行测试
+# 包含两层：单元测试（Node）+ 端到端测试（Playwright 真实浏览器）。
 # 如果测试失败，GitHub 会在提交记录上显示红色叉号，并给你发邮件提醒。
 name: 运行测试
 
@@ -16,12 +17,23 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      # 2. 安装 Node.js（本项目测试零依赖，不需要 npm install）
+      # 2. 安装 Node.js
       - name: 安装 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
 
-      # 3. 运行测试
-      - name: 运行测试
+      # 3. 安装依赖（E2E 测试需要 Playwright）
+      - name: 安装依赖
+        run: npm ci
+
+      # 4. 运行单元测试（零依赖，快速校验）
+      - name: 运行单元测试
         run: npm test
+
+      # 5. 安装 Chromium 浏览器并运行 E2E 测试
+      - name: 安装 Playwright 浏览器
+        run: npx playwright install --with-deps chromium
+
+      - name: 运行 E2E 测试
+        run: npm run test:e2e

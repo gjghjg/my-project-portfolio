@@ -68,5 +68,18 @@ export function setupScrollspy() {
     observer.observe(section);
   }
 
+  // 边界情况：滚到页面底部时，最后一个区块可能永远到不了视口中部
+  // （页面已经滚不动了），此时直接高亮最后一个链接。
+  window.addEventListener(
+    "scroll",
+    () => {
+      const atBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 2;
+      if (atBottom) setActive(links[links.length - 1]);
+    },
+    { passive: true }
+  );
+
   setActive(links[0]); // 默认高亮 Home
 }

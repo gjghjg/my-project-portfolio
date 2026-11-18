@@ -7,8 +7,13 @@
 ## 快速开始
 
 ```bash
-npm run dev    # 启动本地预览服务器
-npm test       # 运行测试
+npm run dev      # 启动本地预览服务器
+npm test         # 单元测试（Node，零依赖）
+
+# E2E 浏览器测试（首次使用需先安装）：
+npm install
+npx playwright install chromium
+npm run test:e2e
 ```
 
 ## 目录结构

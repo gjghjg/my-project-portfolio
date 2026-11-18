@@ -2,10 +2,14 @@
   "name": "personal-portfolio",
   "version": "0.1.0",
   "private": true,
-  "description": "个人项目作品集网站（MVP）",
+  "description": "个人项目作品集网站",
   "type": "module",
   "scripts": {
     "test": "node --test \"tests/*.test.js\"",
+    "test:e2e": "playwright test",
     "dev": "node scripts/dev-server.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
   }
 }
