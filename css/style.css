@@ -48,6 +48,41 @@ a:hover {
   opacity: 0.55;
 }
 
+/* ---------- 键盘可访问性 ---------- */
+/* 不用 display:none 隐藏，否则链接无法通过 Tab 获得焦点 */
+.skip-link {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  z-index: 4;
+  padding: 10px 16px;
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-weight: 700;
+  white-space: nowrap;
+  transform: translate(-50%, calc(-100% - 32px));
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus {
+  transform: translate(-50%, 0);
+}
+
+.skip-link:hover {
+  opacity: 1;
+}
+
+/* 鼠标点击不显示额外焦点框，键盘 Tab 时清楚标出当前位置 */
+:where(a, button):focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 5px;
+}
+
+/* main 只是跳转后的阅读起点，不需要给整个区块画焦点框 */
+main:focus {
+  outline: none;
+}
+
 /* ---------- 背景画布：固定在内容后面 ---------- */
 #flow-canvas {
   position: fixed;
@@ -266,10 +301,11 @@ main,
   }
 }
 
-/* ---------- 导航链接：默认半透明，当前区块高亮 ---------- */
+/* ---------- 导航链接：弱化非当前项，当前区块高亮 ---------- */
 .nav__link {
   display: inline-block;
-  opacity: 0.45;
+  /* 0.65 在明暗两套背景上都能让普通文字达到 4.5:1 对比度 */
+  opacity: 0.65;
   transition: opacity 0.3s ease;
 }
 
@@ -296,9 +332,13 @@ main,
     scroll-behavior: auto;
   }
 
+  .skip-link,
+  .reveal {
+    transition: none;
+  }
+
   .reveal {
     opacity: 1;
     transform: none;
-    transition: none;
   }
 }

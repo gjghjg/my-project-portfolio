@@ -22,6 +22,9 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <!-- 键盘用户第一次按 Tab 时显示，可跳过首屏导航直达主要内容 -->
+  <a class="skip-link" href="#main-content">跳转到主要内容</a>
+
   <!-- 粒子流动背景（Canvas 绘制，见 js/flow-background.js） -->
   <canvas id="flow-canvas" aria-hidden="true"></canvas>
 
@@ -29,9 +32,9 @@
   <div class="frame" aria-hidden="true"></div>
 
   <!-- 左下角竖排主题切换 -->
-  <div class="theme-switch">
-    <button id="theme-light" class="theme-switch__btn" type="button" aria-pressed="true">■ LIGHT</button>
-    <button id="theme-dark" class="theme-switch__btn" type="button" aria-pressed="false">□ DARK</button>
+  <div class="theme-switch" role="group" aria-label="颜色主题">
+    <button id="theme-light" class="theme-switch__btn" type="button" aria-label="切换到浅色主题" aria-pressed="true">■ LIGHT</button>
+    <button id="theme-dark" class="theme-switch__btn" type="button" aria-label="切换到深色主题" aria-pressed="false">□ DARK</button>
   </div>
 
   <!-- 首屏 -->
@@ -43,10 +46,10 @@
 
     <nav class="nav" aria-label="页面导航">
       <ul class="nav__list">
-        <li><a class="nav__link" href="#home">● Home</a></li>
-        <li><a class="nav__link" href="#projects">● Projects</a></li>
-        <li><a class="nav__link" href="#info">● Info</a></li>
-        <li><a class="nav__link" href="#contact">● Contact</a></li>
+        <li><a class="nav__link" href="#home"><span aria-hidden="true">●</span> Home</a></li>
+        <li><a class="nav__link" href="#projects"><span aria-hidden="true">●</span> Projects</a></li>
+        <li><a class="nav__link" href="#info"><span aria-hidden="true">●</span> Info</a></li>
+        <li><a class="nav__link" href="#contact"><span aria-hidden="true">●</span> Contact</a></li>
       </ul>
     </nav>
 
@@ -60,18 +63,19 @@
     </p>
   </header>
 
-  <main id="top">
+  <!-- tabindex="-1" 允许跳转链接把焦点移到 main，但不会多出一次 Tab 停留 -->
+  <main id="main-content" tabindex="-1">
     <!-- 项目列表（由 JS 根据 data.js 中的数据渲染） -->
-    <section id="projects" class="section">
-      <h2 class="section__label">PROJECTS</h2>
+    <section id="projects" class="section" aria-labelledby="projects-title">
+      <h2 id="projects-title" class="section__label">PROJECTS</h2>
       <ul id="project-list" class="project-list">
         <!-- 项目条目由 js/main.js 动态生成 -->
       </ul>
     </section>
 
     <!-- 关于我 -->
-    <section id="info" class="section">
-      <h2 class="section__label">INFO</h2>
+    <section id="info" class="section" aria-labelledby="info-title">
+      <h2 id="info-title" class="section__label">INFO</h2>
       <p class="section__text">
         这里写一段自我介绍：你的专业背景、正在学习的技术、感兴趣的方向。
         示例：我是一名编程自学者，目前在学习 HTML、CSS、JavaScript，
@@ -86,8 +90,8 @@
     </section>
 
     <!-- 联系方式 -->
-    <section id="contact" class="section">
-      <h2 class="section__label">CONTACT</h2>
+    <section id="contact" class="section" aria-labelledby="contact-title">
+      <h2 id="contact-title" class="section__label">CONTACT</h2>
       <ul class="contact-list">
         <li><a href="mailto:you@example.com">you@example.com</a></li>
         <li><a href="https://github.com/yourname" target="_blank" rel="noopener">github.com/yourname</a></li>

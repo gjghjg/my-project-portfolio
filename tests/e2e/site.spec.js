@@ -62,3 +62,96 @@ test("页脚：显示当前年份", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("#year")).toHaveText(String(new Date().getFullYear()));
 });
+
+test("键盘：第一次 Tab 显示跳转链接，Enter 后焦点进入主要内容", async ({ page }) => {
+  await page.goto("/");
+
+  await page.keyboard.press("Tab");
+  const skipLink = page.locator(".skip-link");
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toBeInViewport();
+
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/#main-content$/);
+  await expect(page.locator("#main-content")).toBeFocused();
+});
+
+test("键盘：Tab 到 DARK 后按 Enter 可切换主题，焦点框清晰可见", async ({ page }) => {
+  await page.goto("/");
+
+  // Tab 顺序：跳转链接 → LIGHT → DARK，与页面 DOM 顺序一致
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(page.locator("#theme-light")).toBeFocused();
+  await page.keyboard.press("Tab");
+
+  const darkButton = page.locator("#theme-dark");
+  await expect(darkButton).toBeFocused();
+  const outlineStyle = await darkButton.evaluate((el) => getComputedStyle(el).outlineStyle);
+  const outlineWidth = await darkButton.evaluate((el) => getComputedStyle(el).outlineWidth);
+  expect(outlineStyle).not.toBe("none");
+  expect(outlineWidth).not.toBe("0px");
+
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(darkButton).toHaveAttribute("aria-pressed", "true");
+});
+
+test("对比度：非当前导航在明暗主题下均达到 4.5:1", async ({ page }) => {
+  await page.goto("/");
+  const projectsLink = page.locator('.nav__link[href="#projects"]');
+  await expect(projectsLink).toHaveCSS("opacity", "0.65");
+  expect(await textContrastRatio(projectsLink)).toBeGreaterThanOrEqual(4.5);
+
+  await page.locator("#theme-dark").click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(projectsLink).toHaveCSS("opacity", "0.65");
+  expect(await textContrastRatio(projectsLink)).toBeGreaterThanOrEqual(4.5);
+});
+
+test("减少动态效果：切换主题时画布背景也会立即更新", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+
+  const topLeftPixel = () => page.locator("#flow-canvas").evaluate((canvas) => {
+    const context = canvas.getContext("2d");
+    return Array.from(context.getImageData(0, 0, 1, 1).data);
+  });
+
+  await page.locator("#theme-dark").click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect.poll(topLeftPixel).toEqual([20, 20, 20, 255]);
+
+  await page.locator("#theme-light").click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect.poll(topLeftPixel).toEqual([232, 232, 232, 255]);
+});
+
+/** 把带元素透明度的文字合成到页面背景上，再计算 WCAG 相对亮度对比度。 */
+async function textContrastRatio(locator) {
+  const { foreground, background, opacity } = await locator.evaluate((el) => ({
+    foreground: getComputedStyle(el).color,
+    background: getComputedStyle(document.body).backgroundColor,
+    opacity: Number(getComputedStyle(el).opacity),
+  }));
+  const fg = parseRgb(foreground);
+  const bg = parseRgb(background);
+  const composited = fg.map((channel, index) => channel * opacity + bg[index] * (1 - opacity));
+  const lighter = Math.max(relativeLuminance(composited), relativeLuminance(bg));
+  const darker = Math.min(relativeLuminance(composited), relativeLuminance(bg));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function parseRgb(color) {
+  const channels = color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+  if (!channels || channels.length !== 3) throw new Error(`无法解析颜色：${color}`);
+  return channels;
+}
+
+function relativeLuminance(rgb) {
+  const [r, g, b] = rgb.map((channel) => {
+    const value = channel / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}

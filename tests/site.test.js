@@ -82,6 +82,29 @@ test("主题切换：JS 持久化用户选择（localStorage）", () => {
   assert.ok(mainJs.includes("localStorage"), "main.js 未使用 localStorage 保存主题");
 });
 
+// ---------- 可访问性 ----------
+
+test("可访问性：跳转链接指向可接收焦点的主要内容", () => {
+  assert.ok(html.includes('class="skip-link" href="#main-content"'), "缺少指向主要内容的跳转链接");
+  assert.ok(html.includes('<main id="main-content" tabindex="-1">'), "main 缺少对应 id 或跳转焦点支持");
+  assert.ok(css.includes(".skip-link:focus"), "跳转链接没有键盘聚焦时的显示样式");
+});
+
+test("可访问性：链接和按钮有键盘焦点样式", () => {
+  assert.ok(css.includes(":focus-visible"), "缺少 :focus-visible 焦点样式");
+  assert.ok(css.includes("outline-offset"), "焦点框缺少与元素的间距");
+});
+
+test("可访问性：主题控件和区块有明确的辅助名称", () => {
+  assert.ok(html.includes('role="group" aria-label="颜色主题"'), "主题按钮组缺少中文名称");
+  assert.ok(html.includes('aria-label="切换到浅色主题"'), "浅色按钮缺少中文名称");
+  assert.ok(html.includes('aria-label="切换到深色主题"'), "深色按钮缺少中文名称");
+  for (const id of ["projects", "info", "contact"]) {
+    assert.ok(html.includes(`aria-labelledby="${id}-title"`), `${id} 区块未关联标题`);
+    assert.ok(html.includes(`id="${id}-title"`), `${id} 标题缺少 id`);
+  }
+});
+
 // ---------- 新功能：粒子流动背景 ----------
 
 test("粒子背景：包含 canvas 元素且模块文件存在", () => {

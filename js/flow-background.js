@@ -91,8 +91,17 @@ export function startFlowBackground(canvas) {
   // 主题颜色缓存：getComputedStyle 有开销，不每帧读，
   // 只在初始化、主题切换（data-theme 属性变化）时更新。
   let colors = themeColors();
+
+  function paintBackground() {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = colors.bg;
+    ctx.fillRect(0, 0, width, height);
+  }
+
   new MutationObserver(() => {
     colors = themeColors();
+    // 减少动态效果时没有下一帧动画来覆盖旧颜色，需要立即重绘画布。
+    if (reducedMotion.matches) paintBackground();
   }).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ["data-theme"],
@@ -111,8 +120,7 @@ export function startFlowBackground(canvas) {
     canvas.height = height * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // 重置画布和粒子（数量随屏幕宽度自适应）
-    ctx.fillStyle = colors.bg;
-    ctx.fillRect(0, 0, width, height);
+    paintBackground();
     particles = Array.from(
       { length: responsiveParticleCount(width) },
       randomParticle
