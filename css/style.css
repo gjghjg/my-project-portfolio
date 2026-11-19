@@ -163,7 +163,7 @@ main,
 /* ---------- 左下竖排主题切换 ---------- */
 .theme-switch {
   position: fixed;
-  left: 22px;
+  left: 8px;
   bottom: 32px;
   display: flex;
   flex-direction: column;
@@ -174,6 +174,10 @@ main,
 .theme-switch__btn {
   writing-mode: vertical-rl; /* 竖排文字 */
   transform: rotate(180deg); /* 从下往上读 */
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
   background: none;
   border: none;
   color: var(--color-text);
@@ -181,7 +185,7 @@ main,
   font-weight: 700;
   letter-spacing: 0.12em;
   cursor: pointer;
-  padding: 0;
+  padding: 4px;
   font-family: inherit;
 }
 
@@ -292,7 +296,7 @@ main,
   }
 
   .theme-switch {
-    left: 12px;
+    left: 8px;
     bottom: 20px;
   }
 

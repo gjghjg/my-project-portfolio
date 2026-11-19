@@ -37,12 +37,12 @@ jobs:
       - name: 运行单元测试
         run: npm test
 
-      # 5. 安装 Chromium 浏览器并运行 E2E 测试
+      # 5. 安装三种浏览器内核并运行同一套 E2E + axe 可访问性测试
       - name: 安装 Playwright 浏览器
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium firefox webkit
 
-      - name: 运行 E2E 测试
-        run: npm run test:e2e
+      - name: 运行三浏览器 E2E 测试
+        run: npm run test:e2e:all
 
   deploy:
     # 关键：needs 保证测试全绿才执行部署；失败则自动跳过，网站不更新

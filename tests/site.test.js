@@ -97,8 +97,9 @@ test("可访问性：链接和按钮有键盘焦点样式", () => {
 
 test("可访问性：主题控件和区块有明确的辅助名称", () => {
   assert.ok(html.includes('role="group" aria-label="颜色主题"'), "主题按钮组缺少中文名称");
-  assert.ok(html.includes('aria-label="切换到浅色主题"'), "浅色按钮缺少中文名称");
-  assert.ok(html.includes('aria-label="切换到深色主题"'), "深色按钮缺少中文名称");
+  // 辅助名称必须同时包含可见英文和中文说明，满足 Label in Name。
+  assert.ok(html.includes('aria-label="LIGHT：切换到浅色主题"'), "浅色按钮名称缺少可见文字或中文说明");
+  assert.ok(html.includes('aria-label="DARK：切换到深色主题"'), "深色按钮名称缺少可见文字或中文说明");
   for (const id of ["projects", "info", "contact"]) {
     assert.ok(html.includes(`aria-labelledby="${id}-title"`), `${id} 区块未关联标题`);
     assert.ok(html.includes(`id="${id}-title"`), `${id} 标题缺少 id`);
@@ -204,6 +205,28 @@ test("分享卡片：OG meta 完整且图片真实存在", () => {
 test("分享卡片：og:image 使用绝对地址（相对地址在社交平台无法显示）", () => {
   const m = html.match(/property="og:image" content="([^"]+)"/);
   assert.ok(m && m[1].startsWith("https://"), "og:image 必须是 https 绝对地址");
+});
+
+// ---------- 多浏览器与可访问性质量保障 ----------
+
+test("质量保障：配置三种浏览器和 axe 开发依赖", () => {
+  const config = readFileSync(join(root, "playwright.config.js"), "utf8");
+  for (const browser of ["chromium", "firefox", "webkit"]) {
+    assert.ok(config.includes(`name: "${browser}"`), `Playwright 缺少 ${browser} 项目`);
+  }
+  const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  assert.ok(pkg.devDependencies["@axe-core/playwright"], "缺少 axe 开发依赖");
+  assert.ok(pkg.scripts["test:e2e:all"], "缺少三浏览器测试命令");
+  assert.ok(existsSync(join(root, "tests", "e2e", "accessibility.spec.js")), "缺少可访问性 E2E 测试");
+});
+
+test("质量保障：手机真机验收清单存在且不误标为已测", () => {
+  const checklistPath = join(root, "MOBILE_CHECKLIST.md");
+  assert.ok(existsSync(checklistPath), "缺少手机真机验收清单");
+  const checklist = readFileSync(checklistPath, "utf8");
+  assert.ok(checklist.includes("44×44px"), "清单缺少触控区域检查");
+  assert.ok(checklist.includes("减少动态效果"), "清单缺少减少动态效果检查");
+  assert.ok(checklist.includes("未测"), "真机结果不应预先标记为通过");
 });
 
 // ---------- 项目文档（防止"记忆文件"被误删） ----------
