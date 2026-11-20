@@ -63,11 +63,41 @@ test("页脚：显示当前年份", async ({ page }) => {
   await expect(page.locator("#year")).toHaveText(String(new Date().getFullYear()));
 });
 
-test("键盘：第一次 Tab 显示跳转链接，Enter 后焦点进入主要内容", async ({ page }) => {
+test("运行质量：加载和主题切换无控制台错误或失败请求", async ({ page }) => {
+  const consoleErrors = [];
+  const failedRequests = [];
+  page.on("pageerror", (error) => consoleErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  page.on("requestfailed", (request) => {
+    failedRequests.push(`${request.method()} ${request.url()}：${request.failure()?.errorText}`);
+  });
+  page.on("response", (response) => {
+    if (response.status() >= 400) failedRequests.push(`${response.status()} ${response.url()}`);
+  });
+
+  await page.goto("/");
+  await page.locator("#theme-dark").click();
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(20, 20, 20)");
+  await page.locator("#theme-light").click();
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(232, 232, 232)");
+
+  expect(consoleErrors).toEqual([]);
+  expect(failedRequests).toEqual([]);
+});
+
+test("键盘：第一次 Tab 显示跳转链接，Enter 后焦点进入主要内容", async ({ page, browserName }) => {
   await page.goto("/");
 
-  await page.keyboard.press("Tab");
   const skipLink = page.locator(".skip-link");
+  if (browserName === "webkit") {
+    // WebKit 默认不在 Tab 顺序中包含链接；显式聚焦后仍验证键盘激活行为。
+    // 链接的完整 Tab 顺序由 Chromium / Firefox 检查，Safari 设置需真机验收。
+    await skipLink.focus();
+  } else {
+    await page.keyboard.press("Tab");
+  }
   await expect(skipLink).toBeFocused();
   await expect(skipLink).toBeInViewport();
 
@@ -76,12 +106,12 @@ test("键盘：第一次 Tab 显示跳转链接，Enter 后焦点进入主要内
   await expect(page.locator("#main-content")).toBeFocused();
 });
 
-test("键盘：Tab 到 DARK 后按 Enter 可切换主题，焦点框清晰可见", async ({ page }) => {
+test("键盘：Tab 到 DARK 后按 Enter 可切换主题，焦点框清晰可见", async ({ page, browserName }) => {
   await page.goto("/");
 
-  // Tab 顺序：跳转链接 → LIGHT → DARK，与页面 DOM 顺序一致
+  // Chromium / Firefox：跳转链接 → LIGHT；WebKit 默认跳过链接，第一次 Tab 到 LIGHT。
   await page.keyboard.press("Tab");
-  await page.keyboard.press("Tab");
+  if (browserName !== "webkit") await page.keyboard.press("Tab");
   await expect(page.locator("#theme-light")).toBeFocused();
   await page.keyboard.press("Tab");
 
@@ -101,17 +131,23 @@ test("对比度：非当前导航在明暗主题下均达到 4.5:1", async ({ pa
   await page.goto("/");
   const projectsLink = page.locator('.nav__link[href="#projects"]');
   await expect(projectsLink).toHaveCSS("opacity", "0.65");
+  await expect(projectsLink).toHaveCSS("color", "rgb(26, 26, 26)");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(232, 232, 232)");
   expect(await textContrastRatio(projectsLink)).toBeGreaterThanOrEqual(4.5);
 
   await page.locator("#theme-dark").click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(projectsLink).toHaveCSS("opacity", "0.65");
+  // data-theme 会立即更新，但颜色有过渡；必须等待最终颜色再测量对比度。
+  await expect(projectsLink).toHaveCSS("color", "rgb(232, 232, 232)");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(20, 20, 20)");
   expect(await textContrastRatio(projectsLink)).toBeGreaterThanOrEqual(4.5);
 });
 
 test("减少动态效果：切换主题时画布背景也会立即更新", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await expect(page.locator("body")).toHaveCSS("transition-duration", "0s");
 
   const topLeftPixel = () => page.locator("#flow-canvas").evaluate((canvas) => {
     const context = canvas.getContext("2d");

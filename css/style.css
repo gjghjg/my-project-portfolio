@@ -337,7 +337,8 @@ main,
   }
 
   .skip-link,
-  .reveal {
+  .reveal,
+  body {
     transition: none;
   }
 

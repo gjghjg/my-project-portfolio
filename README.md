@@ -19,7 +19,7 @@ npx playwright install chromium firefox webkit
 npm run test:e2e:all  # Chromium + Firefox + WebKit
 ```
 
-`test:e2e` 和 `test:e2e:all` 都会检查键盘操作、明暗主题、触控区域、响应式布局及 WCAG 自动扫描规则。axe 不能代替人工验收，手机真机检查请使用 `MOBILE_CHECKLIST.md`。
+`test:e2e` 和 `test:e2e:all` 都会检查键盘操作、明暗主题、触控区域、响应式布局、控制台／请求错误及 WCAG 自动扫描规则。WebKit 默认普通 Tab 不包含链接，因此完整链接 Tab 顺序由 Chromium／Firefox 验证，WebKit 另外验证链接 Enter 激活和主题按钮键盘操作；具体边界记录在 `DECISIONS.md`。axe 和浏览器模拟不能代替人工验收，手机真机检查请使用 `MOBILE_CHECKLIST.md`。
 
 ## 目录结构
 

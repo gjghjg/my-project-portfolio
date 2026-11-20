@@ -7,13 +7,15 @@ const viewports = [
 ];
 
 for (const viewport of viewports) {
-  test(`axe：${viewport.name}的明暗主题均无 WCAG 自动扫描违规`, async ({ page }, testInfo) => {
-    await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    // 让所有内容直接显示，也避免动画干扰扫描结果。
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
+  for (const theme of ["light", "dark"]) {
+    test(`axe：${viewport.name}的${theme}主题无 WCAG 自动扫描违规`, async ({ page }, testInfo) => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      // 让所有内容直接显示，也避免动画干扰扫描结果。
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto("/");
 
-    for (const theme of ["light", "dark"]) {
+      // 每个主题使用独立页面：Firefox 在 axe 扫描后切换主题可能崩溃，
+      // 隔离页面既能避开引擎冲突，也避免前一个扫描影响下一个状态。
       await page.locator(`#theme-${theme}`).click();
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       await expect(page.locator("body")).toHaveCSS(
@@ -35,8 +37,8 @@ for (const viewport of viewports) {
         summary,
         `${testInfo.project.name}／${viewport.name}／${theme} 发现可访问性违规`
       ).toEqual([]);
-    }
-  });
+    });
+  }
 }
 
 test("触控：两个主题按钮的可点击区域均至少为 44×44px", async ({ page }) => {
