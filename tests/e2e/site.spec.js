@@ -91,12 +91,13 @@ test("键盘：第一次 Tab 显示跳转链接，Enter 后焦点进入主要内
   await page.goto("/");
 
   const skipLink = page.locator(".skip-link");
-  if (browserName === "webkit") {
-    // WebKit 默认不在 Tab 顺序中包含链接；显式聚焦后仍验证键盘激活行为。
-    // 链接的完整 Tab 顺序由 Chromium / Firefox 检查，Safari 设置需真机验收。
+  await page.keyboard.press("Tab");
+  const tabReachedSkipLink = await skipLink.evaluate((el) => el === document.activeElement);
+  if (!tabReachedSkipLink) {
+    // 某些 WebKit 平台／设置不在普通 Tab 顺序中包含链接，单独验证 Enter 激活。
+    // Chromium / Firefox 若第一次 Tab 没到跳转链接，仍直接判定失败。
+    expect(browserName, "只有 WebKit 的平台默认设置可能跳过链接").toBe("webkit");
     await skipLink.focus();
-  } else {
-    await page.keyboard.press("Tab");
   }
   await expect(skipLink).toBeFocused();
   await expect(skipLink).toBeInViewport();
@@ -106,12 +107,13 @@ test("键盘：第一次 Tab 显示跳转链接，Enter 后焦点进入主要内
   await expect(page.locator("#main-content")).toBeFocused();
 });
 
-test("键盘：Tab 到 DARK 后按 Enter 可切换主题，焦点框清晰可见", async ({ page, browserName }) => {
+test("键盘：Tab 到 DARK 后按 Enter 可切换主题，焦点框清晰可见", async ({ page }) => {
   await page.goto("/");
 
-  // Chromium / Firefox：跳转链接 → LIGHT；WebKit 默认跳过链接，第一次 Tab 到 LIGHT。
+  // 第一次 Tab 可能到跳转链接，也可能被当前 WebKit 设置直接送到 LIGHT；按真实焦点判断。
   await page.keyboard.press("Tab");
-  if (browserName !== "webkit") await page.keyboard.press("Tab");
+  const skipLinkHasFocus = await page.locator(".skip-link").evaluate((el) => el === document.activeElement);
+  if (skipLinkHasFocus) await page.keyboard.press("Tab");
   await expect(page.locator("#theme-light")).toBeFocused();
   await page.keyboard.press("Tab");
 
