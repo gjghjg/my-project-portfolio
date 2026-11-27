@@ -65,6 +65,15 @@ test("页面：有 lang、title 和 viewport 设置", () => {
   assert.ok(html.includes("viewport"), "缺少 viewport meta");
 });
 
+test("个人信息：姓名、邮箱和 GitHub 均使用真实内容", () => {
+  assert.ok(html.includes("<title>汤宇凡 · Developer</title>"), "页面标题未使用真实姓名");
+  assert.ok(html.includes('<h1 class="hero__name">汤宇凡</h1>'), "首屏姓名未更新");
+  assert.ok(html.includes('href="mailto:lingayu3214@163.com"'), "邮箱链接未更新");
+  assert.ok(html.includes('href="https://github.com/gjghjg"'), "GitHub 链接未更新");
+  assert.ok(!html.includes("你的名字"), "页面仍包含姓名占位");
+  assert.ok(!html.includes("you@example.com"), "页面仍包含邮箱占位");
+});
+
 // ---------- 新功能：主题切换 ----------
 
 test("主题切换：包含 LIGHT / DARK 按钮和 data-theme 属性", () => {

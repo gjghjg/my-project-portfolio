@@ -9,7 +9,7 @@ import { projects } from "../../js/data.js";
 
 test("首页加载：标题和首屏内容正确", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/你的名字/);
+  await expect(page).toHaveTitle(/汤宇凡/);
   await expect(page.locator(".hero__name")).toBeVisible();
   await expect(page.locator("#flow-canvas")).toBeVisible();
 });

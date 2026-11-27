@@ -43,7 +43,7 @@ def main():
     small_font = load_font(["consola.ttf", "msyh.ttc"], 28)
 
     # 左上：名字 + 角色
-    draw.text((90, 110), "你的名字", font=name_font, fill=FG)
+    draw.text((90, 110), "汤宇凡", font=name_font, fill=FG)
     draw.text((95, 260), "Developer in Training", font=role_font, fill=FG)
 
     # 左下：方形符号（呼应 favicon）
