@@ -220,13 +220,16 @@ test("质量保障：配置三种浏览器和 axe 开发依赖", () => {
   assert.ok(existsSync(join(root, "tests", "e2e", "accessibility.spec.js")), "缺少可访问性 E2E 测试");
 });
 
-test("质量保障：手机真机验收清单存在且不误标为已测", () => {
+test("质量保障：手机真机验收记录如实反映用户反馈", () => {
   const checklistPath = join(root, "MOBILE_CHECKLIST.md");
   assert.ok(existsSync(checklistPath), "缺少手机真机验收清单");
   const checklist = readFileSync(checklistPath, "utf8");
   assert.ok(checklist.includes("44×44px"), "清单缺少触控区域检查");
   assert.ok(checklist.includes("减少动态效果"), "清单缺少减少动态效果检查");
-  assert.ok(checklist.includes("未测"), "真机结果不应预先标记为通过");
+  assert.ok(checklist.includes("2026-11-27"), "缺少本次真机验收日期");
+  assert.ok(checklist.includes("通过（整体反馈）"), "缺少用户整体验收反馈");
+  assert.ok(checklist.includes("未记录"), "不得虚构未提供的设备或浏览器信息");
+  assert.ok(!checklist.includes("| 待填写 |"), "验收表仍保留待填写占位行");
 });
 
 // ---------- 项目文档（防止"记忆文件"被误删） ----------

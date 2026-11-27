@@ -36,7 +36,7 @@ tests/site.test.js      数据校验 + 页面结构校验 + 功能校验
 tests/e2e/             真实浏览器交互、响应式和 axe 可访问性测试
 AGENTS.md               给 AI 协作者的工作约定（提交、测试）
 DECISIONS.md            设计/技术决策记录（"为什么这么做"）
-MOBILE_CHECKLIST.md     手机真机人工验收清单（结果需实际填写）
+MOBILE_CHECKLIST.md     手机真机人工验收清单与真实反馈记录
 .github/workflows/      GitHub Actions：三浏览器测试通过后部署
 ```
 
